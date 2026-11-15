@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://lunar-window-backend.onrender.com/api/$1"
+    },
+    {
+      "source": "/health",
+      "destination": "https://lunar-window-backend.onrender.com/health"
+    },
+    {
+      "source": "/ready",
+      "destination": "https://lunar-window-backend.onrender.com/ready"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

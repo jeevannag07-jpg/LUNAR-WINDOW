@@ -1,0 +1,23 @@
+# ==============================================================================
+# LUNAR WINDOW — Render Blueprint Specification
+# Free Tier FastAPI Service Deployment
+# ==============================================================================
+
+services:
+  - type: web
+    name: lunar-window-backend
+    runtime: python
+    plan: free
+    region: oregon
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt && python scripts/download_kernels.py
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: LUNAR_DEBUG
+        value: "false"
+      - key: LUNAR_CORS_ORIGINS
+        value: '["https://lunar-window.vercel.app","http://localhost:5173","http://localhost:3000"]'

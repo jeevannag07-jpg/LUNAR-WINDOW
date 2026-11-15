@@ -8,3 +8,16 @@ node_modules/
 !.env.example
 dist/
 .vscode/
+
+# SPICE Kernels and Local Ephemeris Cache
+*.bpc
+*.bsp
+*.tls
+*.tf
+*.tpc
+*.ti
+*.cmt
+backend/data/kernels/
+data/kernels/
+.cache/
+.spice/
