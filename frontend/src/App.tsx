@@ -21,8 +21,31 @@ import { Reports } from './pages/Reports';
 import { DataSources } from './pages/DataSources';
 import { SettingsPage } from './pages/SettingsPage';
 
+const getInitialPage = (): PageId => {
+  if (typeof window !== 'undefined' && window.location.hash) {
+    const hash = window.location.hash.replace('#', '') as PageId;
+    const validPages: PageId[] = [
+      'mission-control',
+      'lunar-atlas',
+      'landing-site-intelligence',
+      'lunar-explorer',
+      'site-intelligence',
+      'solar-analysis',
+      'earth-visibility',
+      'terrain-analysis',
+      'mission-planner',
+      'analysis-workspace',
+      'reports',
+      'data-sources',
+      'settings',
+    ];
+    if (validPages.includes(hash)) return hash;
+  }
+  return 'mission-control';
+};
+
 export const App: React.FC = () => {
-  const [activePage, setActivePage] = useState<PageId>('mission-control');
+  const [activePage, setActivePage] = useState<PageId>(getInitialPage);
   const [activeSite, setActiveSite] = useState<LunarSite>(CANDIDATE_LUNAR_SITES[0]);
   const [backendStatus, setBackendStatus] = useState<'ready' | 'healthy' | 'offline' | 'checking'>('checking');
 
@@ -108,7 +131,13 @@ export const App: React.FC = () => {
 
       {/* Main Body: Sidebar + Dynamic Page Content */}
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        <Sidebar activePage={activePage} onNavigate={setActivePage} />
+        <Sidebar
+          activePage={activePage}
+          onNavigate={(p) => {
+            setActivePage(p);
+            window.location.hash = p;
+          }}
+        />
 
         <main
           style={{

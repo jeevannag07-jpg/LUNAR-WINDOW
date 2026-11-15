@@ -3,6 +3,7 @@ import { Globe, Search, Maximize2, Minimize2, CheckCircle2, AlertCircle, Compass
 import type { LunarLandmark } from '../../data/lunarLandmarks';
 import { LUNAR_SOUTH_POLAR_LANDMARKS } from '../../data/lunarLandmarks';
 import type { LunarSite } from '../../types/api';
+import type { AtlasViewMode } from './AtlasViewport';
 
 interface AtlasTopBarProps {
   activeSite: LunarSite;
@@ -10,6 +11,8 @@ interface AtlasTopBarProps {
   onSelectLandmark: (lm: LunarLandmark) => void;
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
+  viewMode?: AtlasViewMode;
+  onSelectViewMode?: (mode: AtlasViewMode) => void;
 }
 
 export const AtlasTopBar: React.FC<AtlasTopBarProps> = ({
@@ -18,6 +21,8 @@ export const AtlasTopBar: React.FC<AtlasTopBarProps> = ({
   onSelectLandmark,
   isFullscreen,
   onToggleFullscreen,
+  viewMode,
+  onSelectViewMode,
 }) => {
   const [utcTime, setUtcTime] = useState<string>('');
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
@@ -96,6 +101,56 @@ export const AtlasTopBar: React.FC<AtlasTopBarProps> = ({
             3D EXPLORATION
           </span>
         </div>
+
+        {/* View Mode Segmented Switch */}
+        {viewMode && onSelectViewMode && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              backgroundColor: 'rgba(15, 23, 42, 0.8)',
+              border: '1px solid rgba(56, 189, 248, 0.25)',
+              borderRadius: '4px',
+              padding: '2px',
+              gap: '2px',
+            }}
+          >
+            <button
+              onClick={() => onSelectViewMode('south-polar')}
+              style={{
+                background: viewMode === 'south-polar' ? 'rgba(56, 189, 248, 0.2)' : 'none',
+                border: viewMode === 'south-polar' ? '1px solid var(--accent-cyan)' : '1px solid transparent',
+                borderRadius: '3px',
+                color: viewMode === 'south-polar' ? 'var(--accent-cyan)' : 'var(--text-dim)',
+                fontSize: '0.62rem',
+                fontFamily: 'var(--font-mono)',
+                fontWeight: 700,
+                padding: '2px 7px',
+                cursor: 'pointer',
+              }}
+              title="South Polar Stereographic Cartography (80°S-90°S)"
+            >
+              SOUTH POLAR
+            </button>
+            <button
+              onClick={() => onSelectViewMode('global-moon')}
+              style={{
+                background: viewMode === 'global-moon' ? 'rgba(56, 189, 248, 0.2)' : 'none',
+                border: viewMode === 'global-moon' ? '1px solid var(--accent-cyan)' : '1px solid transparent',
+                borderRadius: '3px',
+                color: viewMode === 'global-moon' ? 'var(--accent-cyan)' : 'var(--text-dim)',
+                fontSize: '0.62rem',
+                fontFamily: 'var(--font-mono)',
+                fontWeight: 700,
+                padding: '2px 7px',
+                cursor: 'pointer',
+              }}
+              title="Global 3D Rotating Moon Sphere"
+            >
+              GLOBAL 3D
+            </button>
+          </div>
+        )}
 
         {/* Vertical divider */}
         <div style={{ width: '1px', height: '18px', backgroundColor: 'rgba(255, 255, 255, 0.15)' }} />

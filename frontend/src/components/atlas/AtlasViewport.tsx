@@ -474,13 +474,13 @@ export const AtlasViewport: React.FC<AtlasViewportProps> = ({
             <circle cx="0" cy="0" r={DISK_RADIUS_SVG} />
           </clipPath>
 
-          {/* Elevation colormap false-color gradient */}
+          {/* Elevation colormap false-color gradient - subtle hypsometric tinting without neon burnout */}
           <radialGradient id="lolaElevationGradient" cx="48%" cy="48%" r="52%">
-            <stop offset="0%" stopColor="#4338CA" stopOpacity="0.4" />
-            <stop offset="35%" stopColor="#06B6D4" stopOpacity="0.3" />
-            <stop offset="65%" stopColor="#10B981" stopOpacity="0.3" />
-            <stop offset="85%" stopColor="#F59E0B" stopOpacity="0.35" />
-            <stop offset="100%" stopColor="#EF4444" stopOpacity="0.4" />
+            <stop offset="0%" stopColor="#1E1B4B" stopOpacity="0.5" />
+            <stop offset="35%" stopColor="#0369A1" stopOpacity="0.35" />
+            <stop offset="65%" stopColor="#0EA5E9" stopOpacity="0.25" />
+            <stop offset="85%" stopColor="#D97706" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="#DC2626" stopOpacity="0.35" />
           </radialGradient>
 
           {/* Slope relief highlight filter */}
@@ -535,15 +535,15 @@ export const AtlasViewport: React.FC<AtlasViewportProps> = ({
             strokeWidth="1.5"
           />
 
-          {/* 3D ROTATING MOON SURFACE GROUP */}
+          {/* LUNAR SURFACE GROUP (Cartographic frame fixed to Prime Meridian up in South Polar view) */}
           <g
             className="moon-3d-rotating-surface"
             style={{
               transformOrigin: '0px 0px',
-              animation: isRotating && viewMode === 'south-polar' ? 'moonSlowRotate 180s linear infinite' : 'none',
+              animation: 'none',
             }}
           >
-            {/* LAYER 1: Genuine NASA LROC South Polar Photographic Basemap */}
+            {/* LAYER 1: Genuine NASA LROC South Polar Photographic Basemap (1024x1024 LROC Nadir Mosaic) */}
             {layers.baseImagery && viewMode === 'south-polar' && (
               <g clipPath="url(#polarDiskClip)" opacity={layers.baseOpacity}>
                 <image
@@ -571,7 +571,7 @@ export const AtlasViewport: React.FC<AtlasViewportProps> = ({
               </g>
             )}
 
-            {/* LAYER 2: Elevation (LOLA) Topographic Color Map */}
+            {/* LAYER 2: Elevation (LOLA) Topographic Color Map (Subtle hypsometric overlay) */}
             {layers.elevation && (
               <circle
                 cx="0"
@@ -580,7 +580,7 @@ export const AtlasViewport: React.FC<AtlasViewportProps> = ({
                 fill="url(#lolaElevationGradient)"
                 clipPath="url(#polarDiskClip)"
                 opacity={layers.elevationOpacity}
-                style={{ mixBlendMode: 'color-dodge' }}
+                style={{ mixBlendMode: 'overlay' }}
               />
             )}
 
@@ -744,18 +744,20 @@ export const AtlasViewport: React.FC<AtlasViewportProps> = ({
               </g>
             )}
 
-            {/* LAYER 7: Yellow Landmark Callout Badges (Reference 1 Design) */}
+            {/* LAYER 7: Key Landmark Callout Badges (Reference Design) */}
             <g id="layer-landmarks">
               {/* 1. Shackleton Crater Callout */}
               {(() => {
-                const { svgX, svgY } = projectToSvg(-89.67, 129.78);
+                const lm = LUNAR_SOUTH_POLAR_LANDMARKS.find((l) => l.id === 'shackleton_crater');
+                const lat = lm?.latitude_deg ?? -89.67;
+                const lon = lm?.longitude_deg ?? 129.78;
+                const { svgX, svgY } = projectToSvg(lat, lon);
                 const isSelected = selectedLandmark?.id === 'shackleton_crater';
                 return (
                   <g
                     transform={`translate(${svgX}, ${svgY})`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      const lm = LUNAR_SOUTH_POLAR_LANDMARKS.find((l) => l.id === 'shackleton_crater');
                       if (lm) {
                         onSelectLandmark(lm);
                         onInspectCoords({ lat_deg: lm.latitude_deg, lon_deg: lm.longitude_deg });
@@ -763,24 +765,21 @@ export const AtlasViewport: React.FC<AtlasViewportProps> = ({
                     }}
                     style={{ cursor: 'pointer' }}
                   >
-                    <g style={{ transformOrigin: 'center', animation: isRotating && viewMode === 'south-polar' ? 'moonSlowCounterRotate 180s linear infinite' : 'none' }}>
+                    <g style={{ transformOrigin: 'center' }}>
                       {isSelected && (
-                        <circle cx="0" cy="0" r="18" fill="none" stroke="#FACC15" strokeWidth="2" strokeDasharray="3 3">
+                        <circle cx="0" cy="0" r="18" fill="none" stroke="var(--accent-cyan)" strokeWidth="2" strokeDasharray="3 3">
                           <animate attributeName="r" values="14;22;14" dur="2s" repeatCount="indefinite" />
                           <animate attributeName="opacity" values="1;0.4;1" dur="2s" repeatCount="indefinite" />
                         </circle>
                       )}
-                      <circle cx="0" cy="0" r="12" fill="none" stroke="#FACC15" strokeWidth="2.5" />
-                      <circle cx="0" cy="0" r="6" fill="#070D18" stroke="#FACC15" strokeWidth="2" />
-                      <circle cx="0" cy="0" r="2.5" fill="#FACC15" />
+                      <circle cx="0" cy="0" r="12" fill="none" stroke="var(--accent-cyan)" strokeWidth="2.5" />
+                      <circle cx="0" cy="0" r="6" fill="#070D18" stroke="var(--accent-cyan)" strokeWidth="2" />
+                      <circle cx="0" cy="0" r="2.5" fill="var(--accent-cyan)" />
                       {/* Dark Badge Pill */}
                       <g transform="translate(16, -12)">
-                        <rect x="0" y="0" width="82" height="24" rx="4" fill="#070D18" stroke="rgba(250, 204, 21, 0.6)" strokeWidth="1.2" />
-                        <text x="8" y="10" fill="#FACC15" fontSize="7.5" fontWeight="700" fontFamily="var(--font-sans)">
-                          Shackleton
-                        </text>
-                        <text x="8" y="19" fill="#E2E8F0" fontSize="6.5" fontFamily="var(--font-sans)">
-                          Crater (South Pole)
+                        <rect x="0" y="0" width="94" height="22" rx="4" fill="rgba(7, 13, 24, 0.92)" stroke="rgba(56, 189, 248, 0.6)" strokeWidth="1.2" />
+                        <text x="8" y="14" fill="#FFFFFF" fontSize="8" fontWeight="700" fontFamily="var(--font-sans)">
+                          Shackleton Crater
                         </text>
                       </g>
                     </g>
@@ -790,14 +789,16 @@ export const AtlasViewport: React.FC<AtlasViewportProps> = ({
 
               {/* 2. De Gerlache Crater Callout */}
               {(() => {
-                const { svgX, svgY } = projectToSvg(-88.48, -88.34);
+                const lm = LUNAR_SOUTH_POLAR_LANDMARKS.find((l) => l.id === 'de_gerlache_crater');
+                const lat = lm?.latitude_deg ?? -88.48;
+                const lon = lm?.longitude_deg ?? -88.34;
+                const { svgX, svgY } = projectToSvg(lat, lon);
                 const isSelected = selectedLandmark?.id === 'de_gerlache_crater';
                 return (
                   <g
                     transform={`translate(${svgX}, ${svgY})`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      const lm = LUNAR_SOUTH_POLAR_LANDMARKS.find((l) => l.id === 'de_gerlache_crater');
                       if (lm) {
                         onSelectLandmark(lm);
                         onInspectCoords({ lat_deg: lm.latitude_deg, lon_deg: lm.longitude_deg });
@@ -805,21 +806,18 @@ export const AtlasViewport: React.FC<AtlasViewportProps> = ({
                     }}
                     style={{ cursor: 'pointer' }}
                   >
-                    <g style={{ transformOrigin: 'center', animation: isRotating && viewMode === 'south-polar' ? 'moonSlowCounterRotate 180s linear infinite' : 'none' }}>
+                    <g style={{ transformOrigin: 'center' }}>
                       {isSelected && (
-                        <circle cx="0" cy="0" r="16" fill="none" stroke="#FACC15" strokeWidth="2" strokeDasharray="3 3">
+                        <circle cx="0" cy="0" r="16" fill="none" stroke="var(--accent-cyan)" strokeWidth="2" strokeDasharray="3 3">
                           <animate attributeName="r" values="12;20;12" dur="2s" repeatCount="indefinite" />
                         </circle>
                       )}
-                      <circle cx="0" cy="0" r="6" fill="#070D18" stroke="#FACC15" strokeWidth="2" />
-                      <circle cx="0" cy="0" r="2" fill="#FACC15" />
-                      <g transform="translate(10, -10)">
-                        <rect x="0" y="0" width="72" height="22" rx="4" fill="#070D18" stroke="rgba(250, 204, 21, 0.5)" strokeWidth="1" />
-                        <text x="7" y="9" fill="#FACC15" fontSize="7" fontWeight="700" fontFamily="var(--font-sans)">
-                          De Gerlache
-                        </text>
-                        <text x="7" y="17" fill="#E2E8F0" fontSize="6" fontFamily="var(--font-sans)">
-                          Crater (PSR)
+                      <circle cx="0" cy="0" r="6" fill="#070D18" stroke="var(--accent-cyan)" strokeWidth="2" />
+                      <circle cx="0" cy="0" r="2.5" fill="var(--accent-cyan)" />
+                      <g transform="translate(12, -11)">
+                        <rect x="0" y="0" width="94" height="22" rx="4" fill="rgba(7, 13, 24, 0.92)" stroke="rgba(56, 189, 248, 0.5)" strokeWidth="1" />
+                        <text x="8" y="14" fill="#FFFFFF" fontSize="8" fontWeight="700" fontFamily="var(--font-sans)">
+                          De Gerlache Crater
                         </text>
                       </g>
                     </g>
@@ -829,14 +827,16 @@ export const AtlasViewport: React.FC<AtlasViewportProps> = ({
 
               {/* 3. Malapert Massif Callout */}
               {(() => {
-                const { svgX, svgY } = projectToSvg(-84.90, 12.90);
+                const lm = LUNAR_SOUTH_POLAR_LANDMARKS.find((l) => l.id === 'malapert_mountain');
+                const lat = lm?.latitude_deg ?? -84.90;
+                const lon = lm?.longitude_deg ?? 12.90;
+                const { svgX, svgY } = projectToSvg(lat, lon);
                 const isSelected = selectedLandmark?.id === 'malapert_mountain';
                 return (
                   <g
                     transform={`translate(${svgX}, ${svgY})`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      const lm = LUNAR_SOUTH_POLAR_LANDMARKS.find((l) => l.id === 'malapert_mountain');
                       if (lm) {
                         onSelectLandmark(lm);
                         onInspectCoords({ lat_deg: lm.latitude_deg, lon_deg: lm.longitude_deg });
@@ -844,21 +844,18 @@ export const AtlasViewport: React.FC<AtlasViewportProps> = ({
                     }}
                     style={{ cursor: 'pointer' }}
                   >
-                    <g style={{ transformOrigin: 'center', animation: isRotating && viewMode === 'south-polar' ? 'moonSlowCounterRotate 180s linear infinite' : 'none' }}>
+                    <g style={{ transformOrigin: 'center' }}>
                       {isSelected && (
-                        <circle cx="0" cy="0" r="16" fill="none" stroke="#FACC15" strokeWidth="2" strokeDasharray="3 3">
+                        <circle cx="0" cy="0" r="16" fill="none" stroke="var(--accent-cyan)" strokeWidth="2" strokeDasharray="3 3">
                           <animate attributeName="r" values="12;20;12" dur="2s" repeatCount="indefinite" />
                         </circle>
                       )}
-                      <polygon points="0,-8 7,5 -7,5" fill="#070D18" stroke="#FACC15" strokeWidth="2" />
-                      <circle cx="0" cy="0" r="2" fill="#FACC15" />
-                      <g transform="translate(12, -10)">
-                        <rect x="0" y="0" width="62" height="22" rx="4" fill="#070D18" stroke="rgba(250, 204, 21, 0.5)" strokeWidth="1" />
-                        <text x="6" y="9" fill="#FACC15" fontSize="7" fontWeight="700" fontFamily="var(--font-sans)">
-                          Malapert
-                        </text>
-                        <text x="6" y="17" fill="#E2E8F0" fontSize="6" fontFamily="var(--font-sans)">
-                          Massif (+5km)
+                      <polygon points="0,-8 7,5 -7,5" fill="#070D18" stroke="var(--accent-cyan)" strokeWidth="2" />
+                      <circle cx="0" cy="0" r="2" fill="var(--accent-cyan)" />
+                      <g transform="translate(12, -11)">
+                        <rect x="0" y="0" width="86" height="22" rx="4" fill="rgba(7, 13, 24, 0.92)" stroke="rgba(56, 189, 248, 0.5)" strokeWidth="1" />
+                        <text x="8" y="14" fill="#FFFFFF" fontSize="8" fontWeight="700" fontFamily="var(--font-sans)">
+                          Malapert Massif
                         </text>
                       </g>
                     </g>
@@ -868,14 +865,16 @@ export const AtlasViewport: React.FC<AtlasViewportProps> = ({
 
               {/* 4. Connecting Ridge Callout */}
               {(() => {
-                const { svgX, svgY } = projectToSvg(-89.44, 138.0);
+                const lm = LUNAR_SOUTH_POLAR_LANDMARKS.find((l) => l.id === 'shackleton_connecting_ridge');
+                const lat = lm?.latitude_deg ?? -89.44;
+                const lon = lm?.longitude_deg ?? 138.0;
+                const { svgX, svgY } = projectToSvg(lat, lon);
                 const isSelected = selectedLandmark?.id === 'shackleton_connecting_ridge';
                 return (
                   <g
                     transform={`translate(${svgX}, ${svgY})`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      const lm = LUNAR_SOUTH_POLAR_LANDMARKS.find((l) => l.id === 'shackleton_connecting_ridge');
                       if (lm) {
                         onSelectLandmark(lm);
                         onInspectCoords({ lat_deg: lm.latitude_deg, lon_deg: lm.longitude_deg });
@@ -883,21 +882,18 @@ export const AtlasViewport: React.FC<AtlasViewportProps> = ({
                     }}
                     style={{ cursor: 'pointer' }}
                   >
-                    <g style={{ transformOrigin: 'center', animation: isRotating && viewMode === 'south-polar' ? 'moonSlowCounterRotate 180s linear infinite' : 'none' }}>
+                    <g style={{ transformOrigin: 'center' }}>
                       {isSelected && (
-                        <circle cx="0" cy="0" r="16" fill="none" stroke="#FACC15" strokeWidth="2" strokeDasharray="3 3">
+                        <circle cx="0" cy="0" r="16" fill="none" stroke="var(--accent-cyan)" strokeWidth="2" strokeDasharray="3 3">
                           <animate attributeName="r" values="12;20;12" dur="2s" repeatCount="indefinite" />
                         </circle>
                       )}
-                      <rect x="-5" y="-5" width="10" height="10" transform="rotate(45)" fill="#070D18" stroke="#FACC15" strokeWidth="2" />
-                      <circle cx="0" cy="0" r="2" fill="#FACC15" />
-                      <g transform="translate(12, -10)">
-                        <rect x="0" y="0" width="68" height="22" rx="4" fill="#070D18" stroke="rgba(250, 204, 21, 0.5)" strokeWidth="1" />
-                        <text x="6" y="9" fill="#FACC15" fontSize="7" fontWeight="700" fontFamily="var(--font-sans)">
-                          Connecting
-                        </text>
-                        <text x="6" y="17" fill="#E2E8F0" fontSize="6" fontFamily="var(--font-sans)">
-                          Ridge (Site 001)
+                      <rect x="-5" y="-5" width="10" height="10" transform="rotate(45)" fill="#070D18" stroke="var(--accent-cyan)" strokeWidth="2" />
+                      <circle cx="0" cy="0" r="2" fill="var(--accent-cyan)" />
+                      <g transform="translate(12, -11)">
+                        <rect x="0" y="0" width="88" height="22" rx="4" fill="rgba(7, 13, 24, 0.92)" stroke="rgba(56, 189, 248, 0.5)" strokeWidth="1" />
+                        <text x="8" y="14" fill="#FFFFFF" fontSize="8" fontWeight="700" fontFamily="var(--font-sans)">
+                          Connecting Ridge
                         </text>
                       </g>
                     </g>
@@ -944,27 +940,6 @@ export const AtlasViewport: React.FC<AtlasViewportProps> = ({
             )}
           </g>
 
-          {/* 3D SPHERICAL SHADING & ILLUMINATION: Directional sunlight + terminator + limb darkening */}
-          {viewMode === 'south-polar' && (
-            <>
-              <circle
-                cx="0"
-                cy="0"
-                r={DISK_RADIUS_SVG}
-                fill="url(#moon3dSunShade)"
-                clipPath="url(#polarDiskClip)"
-                style={{ mixBlendMode: 'multiply', pointerEvents: 'none' }}
-              />
-              <circle
-                cx="0"
-                cy="0"
-                r={DISK_RADIUS_SVG}
-                fill="url(#moon3dLimbGlow)"
-                clipPath="url(#polarDiskClip)"
-                style={{ mixBlendMode: 'screen', pointerEvents: 'none' }}
-              />
-            </>
-          )}
 
           {/* Reticle for Inspected Point */}
           {inspectedSvg && (
@@ -1113,6 +1088,64 @@ export const AtlasViewport: React.FC<AtlasViewportProps> = ({
         >
           {isRotating ? <Pause size={16} /> : <Play size={16} />}
         </button>
+      </div>
+
+      {/* OVERLAY: Bottom-Left Scale Bar & Coordinate Readout (Reference Design) */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '16px',
+          left: '16px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '6px',
+          pointerEvents: 'none',
+          userSelect: 'none',
+          zIndex: 10,
+        }}
+      >
+        {/* Scale Bar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              borderBottom: '2px solid rgba(56, 189, 248, 0.8)',
+              paddingBottom: '2px',
+              gap: '16px',
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.62rem',
+              color: 'var(--accent-cyan)',
+              fontWeight: 700,
+            }}
+          >
+            <span>50 km</span>
+            <span>100 km</span>
+            <span>200 km</span>
+          </div>
+        </div>
+
+        {/* Coordinates Readout */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '0.72rem',
+            color: 'var(--text-secondary)',
+          }}
+        >
+          <MapPin size={12} color="var(--accent-cyan)" />
+          <span>
+            Lat: <strong style={{ color: 'var(--accent-cyan)' }}>{hoverCoords ? hoverCoords.lat_deg.toFixed(2) : '-89.72'}°</strong> &nbsp;
+            Lon: <strong style={{ color: 'var(--accent-cyan)' }}>{hoverCoords ? hoverCoords.lon_deg.toFixed(2) : '138.21'}°</strong>
+          </span>
+          <span style={{ color: 'var(--text-dim)' }}>|</span>
+          <span>
+            Elev: <strong style={{ color: 'var(--text-primary)' }}>{hoverCoords?.elev_km !== undefined ? `${hoverCoords.elev_km.toFixed(1)} km` : '4.2 km'}</strong>
+          </span>
+        </div>
       </div>
     </div>
   );

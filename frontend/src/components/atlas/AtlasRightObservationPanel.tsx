@@ -199,20 +199,23 @@ export const AtlasRightObservationPanel: React.FC<AtlasRightObservationPanelProp
               </div>
             </div>
 
-            {/* Photographic Thumbnail */}
-            {lm?.thumbnail_url && (
-              <img
-                src={lm.thumbnail_url}
-                alt={name}
-                style={{
-                  width: '42px',
-                  height: '42px',
-                  borderRadius: '4px',
-                  objectFit: 'cover',
-                  border: '1px solid rgba(56, 189, 248, 0.4)',
-                }}
-              />
-            )}
+            {/* Photographic Thumbnail with resilient fallback */}
+            <img
+              src={lm?.thumbnail_url || '/assets/basemaps/thumb_shackleton.png'}
+              alt={name}
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/assets/basemaps/shackleton_crater_closeup.png';
+              }}
+              style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '4px',
+                objectFit: 'cover',
+                border: '1px solid rgba(56, 189, 248, 0.4)',
+                backgroundColor: '#050811',
+                flexShrink: 0,
+              }}
+            />
           </div>
 
           {/* Coordinates Grid */}

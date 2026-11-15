@@ -398,5 +398,42 @@ export const SiteIntelligence: React.FC<SiteIntelligenceProps> = ({
                 borderRadius: 'var(--radius-md)',
                 padding: '8px 16px',
                 fontWeight: 600,
+                cursor: isComparing ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {isComparing ? <RefreshCw size={16} className="animate-spin" /> : <Play size={16} />}
+              {isComparing ? 'Evaluating Sites...' : 'Compare 4 Candidate Sites'}
+            </button>
+          </div>
+        </div>
 
-          
+        {comparisonError && (
+          <div style={{ marginTop: '14px', padding: '10px 14px', borderRadius: 'var(--radius-md)', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--accent-rose)', color: 'var(--accent-rose)', fontSize: '0.8rem' }}>
+            {comparisonError}
+          </div>
+        )}
+
+        {comparisonResponse && (
+          <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>
+              Evaluation Results ({comparisonResponse.sites.length} Sites Evaluated)
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px' }}>
+              {comparisonResponse.sites.map((ev) => (
+                <div key={ev.site_id} style={{ padding: '10px 12px', backgroundColor: 'var(--bg-shell)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
+                  <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.85rem' }}>{ev.name}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                    Illumination Fraction: <strong style={{ color: 'var(--accent-amber)' }}>{ev.sunlight_percentage.toFixed(1)}%</strong>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                    Earth Visibility Fraction: <strong style={{ color: 'var(--accent-cyan)' }}>{ev.earth_line_of_sight_percentage.toFixed(1)}%</strong>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};

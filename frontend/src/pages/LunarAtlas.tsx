@@ -38,7 +38,7 @@ export const LunarAtlas: React.FC<LunarAtlasProps> = ({
     baseOpacity: 1.0,
     elevation: false,
     elevationOpacity: 0.65,
-    craterBoundaries: true,
+    craterBoundaries: false,
     candidateSites: true,
     slopeMap: false,
     illumination: false,
@@ -173,6 +173,8 @@ export const LunarAtlas: React.FC<LunarAtlasProps> = ({
         onSelectLandmark={handleSelectLandmark}
         isFullscreen={isFullscreen}
         onToggleFullscreen={handleToggleFullscreen}
+        viewMode={viewMode}
+        onSelectViewMode={setViewMode}
       />
 
       {/* 2. MAIN 3D LUNAR SURFACE VIEWPORT (Central Dominant Exploration Canvas) */}
